@@ -1,0 +1,48 @@
+#!/bin/bash
+
+#=======================
+# Ceph Minimal Installer
+#=======================
+
+# 设置 Ceph 版本和 MON IP
+CEPH_RELEASE="pacific"
+MON_IP="192.168.44.16"
+
+echo "[1/8] 下载 cephadm 工具..."
+wget -O cephadm https://github.com/ceph/ceph/raw/${CEPH_RELEASE}/src/cephadm/cephadm
+chmod +x cephadm
+mv cephadm /usr/local/bin/cephadm
+
+yum install -y yum-utils
+
+
+yum-config-manager --add-repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+
+
+ yum install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+echo "[2/8] 安装 Docker 和 Python3..."
+yum -y install  python3
+
+echo "[3/8] 启动 Docker 服务..."
+systemctl enable --now docker
+
+echo "[4/8] 添加 Ceph ${CEPH_RELEASE} 软件源..."
+cephadm add-repo --release ${CEPH_RELEASE}
+
+echo "[5/8] 安装 Ceph 所需组件..."
+cephadm install
+cephadm install ceph-common
+
+echo "[6/8] 初始化 Ceph 集群（跳过 Dashboard 和监控组件）..."
+cephadm bootstrap \
+  --mon-ip ${MON_IP} \
+  --allow-fqdn-hostname \
+  --allow-overwrite \
+  --skip-dashboard \
+  --skip-monitoring-stack
+
+echo "[7/8] 部署所有可用磁盘为 OSD..."
+ceph orch apply osd --all-available-devices
+
+echo "[8/8] 完成！你可以使用 'ceph -s' 查看集群状态。"
