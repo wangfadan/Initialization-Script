@@ -1,10 +1,6 @@
 #!/bin/bash
 
 
-# 192.168.44.100 controller
-# 192.168.44.101 compute1
-# 192.168.44.102 compute2
-
 # Conf /etc/hosts
 echo "为当前 controller 节点配置映射关系..."
 echo '192.168.44.100 controller' >> /etc/hosts
@@ -259,46 +255,6 @@ sed -i 's/CONFIG_HEAT_INSTALL=n/CONFIG_HEAT_INSTALL=y/g' /root/cloudcs.txt
 echo "controller 正在部署..."
 sshpass -p "$password" packstack --answer-file=/root/cloudcs.txt 
 
-#echo "禁用全局 ID（global_id）回收操作..."
-# ceph config set mon auth_allow_insecure_global_id_reclaim false
-# sleep 10
-# echo "ceph01 查看当前集群状态..."
-# ceph -s
-# echo "初始化集群已创建好!"
-# 
-# read -p "是否继续执行扩容及开启UI界面操作？请输入 y 或 n: " choice
-# 
-# case "$choice" in
-#     [Yy]*)
-#         echo "执行mon扩容操作..."
-#         ceph-deploy mon add ceph02 --address 192.168.44.102
-#         ceph-deploy mon add ceph03 --address 192.168.44.103
-#         echo "执行mgr扩容操作..."
-#         ceph-deploy mgr create ceph02 ceph03
-#         echo "正在启用dashboard服务..."
-#         ceph mgr module enable dashboard
-#         ceph config set mgr mgr/dashboard/ssl false
-#         ceph config set mgr mgr/dashboard/server_addr 0.0.0.0
-#         ceph config set mgr mgr/dashboard/server_port 5050
-#         echo redhat > pass
-#         ceph dashboard ac-user-create admin -i pass administrator
-#         echo "正在重启mgr服务..."
-#         systemctl restart ceph-mgr@ceph01.service
-#         sleep 5
-#         echo "UI访问地址及端口号为："
-#         ceph mgr services
-#         echo "账号：admin 密码：redhat"
-#         echo "完成！"
-#         ;;
-#     [Nn]*)
-#         echo "退出脚本。"
-#         exit 0
-#         ;;
-#     *)
-#         echo "无效的输入，请输入 y 或 n。"
-#         exit 1
-#         ;;
-# esac
 
 echo "controller 启动 network 服务"
 /usr/lib/systemd/systemd-sysv-install enable network
