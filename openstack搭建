@@ -1,7 +1,6 @@
 #!/bin/bash
-# 3 节点，8.4 minimal 安装，单网卡，NAT
-# 所有节点必须配置静态IP，必须配置网关和DNS（以防因软硬件兼容性问题导致安装过程掉网）
-# Auth: tianhairui
+
+
 # 192.168.44.100 controller
 # 192.168.44.101 compute1
 # 192.168.44.102 compute2
@@ -106,8 +105,8 @@ echo "controller 节点NTP 配置完成 :)"
 
 # Def Remote Node
 nodes=("compute1" "compute2")
-user="root"
-password="rootroot"
+user="root"                   //用户名
+password="rootroot"           //密码
 
 # Gen SSH Key(If Not Exists)
 if [ ! -f ~/.ssh/id_rsa ]; then
