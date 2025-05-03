@@ -1,0 +1,70 @@
+#!/bin/bash
+
+# 确保脚本以 root 权限运行
+if [ "$(id -u)" -ne 0 ]; then
+    echo "请使用 root 账号执行此脚本！"
+    exit 1
+fi
+
+没有就下载
+#wget https://downloads.mysql.com/archives/get/p/23/file/mysql-5.7.38-el7-x86_64.tar.gz
+
+# 解压 MySQL
+tar -zxvf mysql-5.7.38-el7-x86_64.tar.gz
+
+# 移动 MySQL 目录
+mv mysql-5.7.38-el7-x86_64 /usr/local/mysql
+
+# 创建 MySQL 用户
+useradd -M -s /sbin/nologin mysql
+mkdir -p /data/mysql/{data,log}
+chown -R mysql:mysql /usr/local/mysql/
+chown -R mysql:mysql /data/mysql/
+
+
+# 备份原有 my.cnf
+
+
+# 创建新的 my.cnf
+cat > /etc/my.cnf <<EOF
+[mysqld]
+basedir=/usr/local/mysql
+datadir=/data/mysql/data
+port=3306
+socket=/usr/local/mysql/mysql.sock
+symbolic-links=0
+character-set-server=utf8
+log-error=/data/mysql/log/mysqld.log
+pid-file=/usr/local/mysql/mysqld.pid
+EOF
+
+# 创建命令链接
+/usr/local/mysql/bin/mysqld --initialize-insecure --user=mysql   --basedir=/usr/local/mysql --datadir=/data/mysql/data
+
+ln -s /usr/local/mysql/bin/* /usr/local/bin/
+
+# 复制启动脚本
+cp /usr/local/mysql/support-files/mysql.server /etc/init.d/mysqld
+
+chkconfig --add mysqld 
+
+chkconfig mysqld on
+
+chkconfig --list mysqld 
+
+systemctl  start mysqld 
+
+# 创建必要的符号链接
+ln -s /usr/local/mysql/mysql.sock /tmp/
+ln -s /usr/lib64/libncurses.so.6 /usr/lib64/libncurses.so.5
+ln -s /usr/lib64/libtinfo.so.6 /usr/lib64/libtinfo.so.5
+
+
+
+
+echo "MySQL 5.7.38 安装完成！"
+echo "请运行以下命令初始化 MySQL 安全设置："
+echo "mysql_secure_installation"
+
+# 启动 MySQL
+mysql
